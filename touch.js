@@ -7,7 +7,7 @@
     const P=new Map();let mode="none",S=null;
     const tapKey=k=>{o.key(true,k);o.vib();setTimeout(()=>o.key(false,k),60)};
     const hyp=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
-    const toGame=e=>{const r=o.rect();return{gx:(e.clientX-r.left)*o.cw()/r.width,gy:(e.clientY-r.top)*o.ch()/r.height,sc:r.width/o.cw()}};
+    const toGame=e=>{const r=o.rect();return{gx:(e.clientX-r.left)*o.cw()/r.width,gy:(e.clientY-r.top)*o.ch()/r.height,sx:r.width/o.cw(),sy:r.height/o.ch()}};
     function down(e){
       P.set(e.pointerId,{x:e.clientX,y:e.clientY});
       if(P.size===1){const t=toGame(e);S={sx:e.clientX,sy:e.clientY,lx:e.clientX,ly:e.clientY,gx:t.gx,gy:t.gy,moved:false,ax:0,ay:0};mode="one"}
@@ -17,9 +17,9 @@
     function move(e){
       const p=P.get(e.pointerId);if(!p)return;p.x=e.clientX;p.y=e.clientY;
       if(mode==="one"&&P.size===1){
-        const t=toGame(e),sc=t.sc||1;
-        if(!S.moved){if(Math.hypot(e.clientX-S.sx,e.clientY-S.sy)<=o.cfg().tapSlop)return;S.moved=true;S.ax=(e.clientX-S.sx)/sc;S.ay=(e.clientY-S.sy)/sc}
-        else{S.ax+=(e.clientX-S.lx)/sc;S.ay+=(e.clientY-S.ly)/sc}
+        const t=toGame(e),scx=t.sx||1,scy=t.sy||1;
+        if(!S.moved){if(Math.hypot(e.clientX-S.sx,e.clientY-S.sy)<=o.cfg().tapSlop)return;S.moved=true;S.ax=(e.clientX-S.sx)/scx;S.ay=(e.clientY-S.sy)/scy}
+        else{S.ax+=(e.clientX-S.lx)/scx;S.ay+=(e.clientY-S.ly)/scy}
         S.lx=e.clientX;S.ly=e.clientY;
         const st=o.cfg().step;
         while(S.ax>=st){tapKey(RIGHT);S.ax-=st}while(S.ax<=-st){tapKey(LEFT);S.ax+=st}

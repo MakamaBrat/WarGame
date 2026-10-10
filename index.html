@@ -68,6 +68,7 @@
 <div id="set"><div id="card">
   <h2>Настройки</h2>
   <div class="row"><span>Масштаб</span><div class="seg" id="s-mode"><button data-v="fit">Вписать</button><button data-v="int">Пиксель</button><button data-v="fill">По ширине</button></div></div>
+  <div class="row"><span>Растянуть на весь экран</span><input type="range" id="r-str" min="0" max="100" step="5"></div>
   <div class="row"><span>Зум</span><div class="seg"><button id="z-">−</button><button id="z+">+</button><button id="z0">1×</button></div></div>
   <div class="row"><span>Картинка</span><div class="seg" id="s-smooth"><button data-v="0">Чёткая</button><button data-v="1">Гладкая</button></div></div>
   <div class="row"><span>Больше карты (270×340)</span><div class="seg" id="s-ext"><button data-v="0">Выкл</button><button data-v="1">Вкл</button></div></div>
@@ -76,7 +77,7 @@
   <div class="row"><span>Вибрация</span><div class="seg" id="s-vib"><button data-v="0">Выкл</button><button data-v="1">Вкл</button></div></div>
   <div class="row"><span>Чувствительность свайпа</span><input type="range" id="r-step" min="6" max="30" step="1"></div>
   <small>Один палец: тап — OK (нижние углы — левая/правая софт-клавиша), перетаскивание — стрелки (курсор/прокрутка карты, меню).
-  Два пальца: щипок — зум, перетаскивание — сдвиг. «Больше карты» показывает поля за краями обычного окна игры.</small>
+  Два пальца: щипок — зум, перетаскивание — сдвиг. «Растянуть» (0–100%) растягивает картинку и интерфейс на весь экран (100% — без полос, но с искажением пропорций). «Больше карты» показывает поля за краями обычного окна игры.</small>
   <button class="close" id="b-close">Готово</button>
 </div></div>
 <script src="runtime.js"></script>
@@ -90,7 +91,7 @@
   const screen=$('screen'),view=$('view'),bgc=$('bgc'),bgx=bgc.getContext('2d');
   const touch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||navigator.maxTouchPoints>0;
   // ---- settings ----
-  const DEF={mode:'fit',smooth:0,ext:0,amb:1,pad:touch?1:0,vib:1,step:12,uz:1,px:0,py:0};
+  const DEF={mode:'fit',smooth:1,ext:0,amb:1,pad:touch?1:0,vib:1,step:12,stretch:100,uz:1,px:0,py:0};
   let store=null;try{localStorage.setItem('aow2.t','1');localStorage.removeItem('aow2.t');store=localStorage}catch(e){}
   let cfg=Object.assign({},DEF);
   try{Object.assign(cfg,JSON.parse(store.getItem('aow2.cfg')||'{}'))}catch(e){}
@@ -118,7 +119,8 @@
     let s=Math.min(aw/cw,ah/ch);
     if(cfg.mode==='int'&&s>=1)s=Math.floor(s);
     else if(cfg.mode==='fill')s=aw/cw;
-    const dw=cw*s,dh=ch*s;
+    let dw=cw*s,dh=ch*s;
+    const f=cfg.stretch/100;dw+=Math.max(0,aw-dw)*f;dh+=Math.max(0,ah-dh)*f; // растяжение на весь экран
     screen.style.width=dw+'px';screen.style.height=dh+'px';
     view.style.width=dw+'px';view.style.height=dh+'px';
     view.style.left=(aw-dw)/2+'px';view.style.top=Math.max(0,(ah-dh)/2)+'px';
@@ -184,6 +186,7 @@
     seg('s-pad',()=>cfg.pad,v=>cfg.pad=+v),
     seg('s-vib',()=>cfg.vib,v=>cfg.vib=+v)];
   const rs=$('r-step');rs.value=cfg.step;rs.oninput=()=>{cfg.step=+rs.value;save()};
+  const rt=$('r-str');rt.value=cfg.stretch;rt.oninput=()=>{cfg.stretch=+rt.value;save();layout()};
   $('z-').onclick=()=>zoom.set(cfg.uz/1.25,cfg.px,cfg.py);$('z+').onclick=()=>zoom.set(cfg.uz*1.25,cfg.px,cfg.py);$('z0').onclick=()=>zoom.set(1,0,0);
   function openSet(){$('set').classList.add('show')}function closeSet(){$('set').classList.remove('show');save()}
   $('bset').onclick=openSet;$('b-close').onclick=closeSet;
