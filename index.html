@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>Art of War 2 — Global Confederation</title>
+<style>
+  :root{--u:52px;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px)}
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:none;font-family:system-ui,sans-serif;color:#dfe9d6}
+  #bg{position:fixed;inset:0;overflow:hidden}
+  #bgc{position:absolute;inset:-10%;width:120%;height:120%;filter:blur(22px) brightness(.55) saturate(1.2)}
+  #view{position:absolute;transform-origin:50% 50%;will-change:transform;touch-action:none}
+  #screen{display:block;image-rendering:pixelated;background:#000;touch-action:none}
+  body.smooth #screen{image-rendering:auto}
+  #top{position:fixed;top:calc(var(--sat) + 6px);right:calc(var(--sar) + 6px);display:flex;gap:6px;z-index:5}
+  #top button{width:38px;height:38px;border-radius:19px;font-size:18px;background:rgba(0,0,0,.45);opacity:.65}
+  button{background:rgba(35,52,30,.82);color:#e6f0dc;border:1px solid rgba(120,160,100,.55);border-radius:10px;font-size:17px;touch-action:none;-webkit-tap-highlight-color:transparent;padding:0}
+  button:active,button.on{background:rgba(95,140,65,.95)}
+  #padbg{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(#0000,#0a0f09 35%);display:none;pointer-events:none}
+  #pad{position:fixed;inset:0;pointer-events:none;z-index:4}
+  #pad button{pointer-events:auto}
+  body.nopad #pad,body.nopad #padbg{display:none!important}
+  .cl{position:absolute;bottom:calc(var(--sab) + 12px)}
+  #dp{left:calc(var(--sal) + 12px);display:grid;grid-template-columns:repeat(3,var(--u));grid-template-rows:repeat(3,var(--u));gap:5px}
+  #dp button{border-radius:12px}
+  #rc{right:calc(var(--sar) + 12px);display:grid;grid-template-columns:calc(var(--u)*1.25) calc(var(--u)*1.25);grid-auto-rows:var(--u);gap:6px}
+  #rc .ok{grid-column:1/3;grid-row:2;border-radius:calc(var(--u)/2);font-weight:700}
+  #keys{position:fixed;left:50%;transform:translateX(-50%);display:none;grid-template-columns:repeat(3,calc(var(--u)*1.1));grid-auto-rows:calc(var(--u)*.85);gap:6px;z-index:6;padding:8px;background:rgba(6,10,5,.8);border-radius:14px}
+  #keys.show{display:grid}
+  #set{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9;display:none;align-items:center;justify-content:center}
+  #set.show{display:flex}
+  #card{width:min(92vw,420px);max-height:88vh;overflow:auto;background:#111a0f;border:1px solid #3d5a33;border-radius:14px;padding:14px 16px;box-sizing:border-box}
+  #card h2{margin:0 0 10px;font-size:18px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0;font-size:15px}
+  .seg{display:flex;gap:4px}.seg button{padding:7px 10px;font-size:14px}.seg button.sel{background:rgba(95,140,65,.95)}
+  input[type=range]{width:150px}
+  #card .close{width:100%;margin-top:6px;padding:10px;font-size:16px}
+  small{color:#8fa384;display:block;line-height:1.4;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="bg"><canvas id="bgc" width="48" height="64"></canvas></div>
+<div id="view"><canvas id="screen" width="240" height="320"></canvas></div>
+<div id="top"><button id="bz" hidden title="Сбросить зум">⟲</button><button id="bfs" title="Полный экран">⛶</button><button id="bset" title="Настройки">⚙</button></div>
+<div id="padbg"></div>
+<div id="pad">
+  <div class="cl" id="dp">
+    <span></span><button data-k="-1">▲</button><span></span>
+    <button data-k="-3">◄</button><button data-k="-5">OK</button><button data-k="-4">►</button>
+    <span></span><button data-k="-2">▼</button><span></span>
+  </div>
+  <div class="cl" id="rc">
+    <button data-k="-6">◄ L</button><button data-k="-7">R ►</button>
+    <button class="ok" data-k="-5">OK</button>
+    <button id="bkeys" style="grid-column:1/3">123 * #</button>
+  </div>
+</div>
+<div id="keys">
+  <button data-k="49">1</button><button data-k="50">2</button><button data-k="51">3</button>
+  <button data-k="52">4</button><button data-k="53">5</button><button data-k="54">6</button>
+  <button data-k="55">7</button><button data-k="56">8</button><button data-k="57">9</button>
+  <button data-k="42">*</button><button data-k="48">0</button><button data-k="35">#</button>
+</div>
+<div id="set"><div id="card">
+  <h2>Настройки</h2>
+  <div class="row"><span>Масштаб</span><div class="seg" id="s-mode"><button data-v="fit">Вписать</button><button data-v="int">Пиксель</button><button data-v="fill">По ширине</button></div></div>
+  <div class="row"><span>Зум</span><div class="seg"><button id="z-">−</button><button id="z+">+</button><button id="z0">1×</button></div></div>
+  <div class="row"><span>Картинка</span><div class="seg" id="s-smooth"><button data-v="0">Чёткая</button><button data-v="1">Гладкая</button></div></div>
+  <div class="row"><span>Больше карты (270×340)</span><div class="seg" id="s-ext"><button data-v="0">Выкл</button><button data-v="1">Вкл</button></div></div>
+  <div class="row"><span>Фон-заливка по краям</span><div class="seg" id="s-amb"><button data-v="0">Выкл</button><button data-v="1">Вкл</button></div></div>
+  <div class="row"><span>Экранные кнопки</span><div class="seg" id="s-pad"><button data-v="0">Скрыть</button><button data-v="1">Показать</button></div></div>
+  <div class="row"><span>Вибрация</span><div class="seg" id="s-vib"><button data-v="0">Выкл</button><button data-v="1">Вкл</button></div></div>
+  <div class="row"><span>Чувствительность свайпа</span><input type="range" id="r-step" min="6" max="30" step="1"></div>
+  <small>Один палец: тап — OK (нижние углы — левая/правая софт-клавиша), перетаскивание — стрелки (курсор/прокрутка карты, меню).
+  Два пальца: щипок — зум, перетаскивание — сдвиг. «Больше карты» показывает поля за краями обычного окна игры.</small>
+  <button class="close" id="b-close">Готово</button>
+</div></div>
+<script src="runtime.js"></script>
+<script src="data.js"></script>
+<script src="startup.js"></script>
+<script src="game.js"></script>
+<script src="touch.js"></script>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const screen=$('screen'),view=$('view'),bgc=$('bgc'),bgx=bgc.getContext('2d');
+  const touch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||navigator.maxTouchPoints>0;
+  // ---- settings ----
+  const DEF={mode:'fit',smooth:0,ext:0,amb:1,pad:touch?1:0,vib:1,step:12,uz:1,px:0,py:0};
+  let store=null;try{localStorage.setItem('aow2.t','1');localStorage.removeItem('aow2.t');store=localStorage}catch(e){}
+  let cfg=Object.assign({},DEF);
+  try{Object.assign(cfg,JSON.parse(store.getItem('aow2.cfg')||'{}'))}catch(e){}
+  cfg.uz=1;cfg.px=0;cfg.py=0; // зум не переживает перезагрузку
+  const save=()=>{try{store.setItem('aow2.cfg',JSON.stringify(cfg))}catch(e){}};
+  RT.env={screen,storage:store,ext:!!cfg.ext,
+    makeCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c},
+    onExit:()=>{document.title='Игра завершена — обнови страницу'},
+    onFrame:()=>{if(cfg.amb)bgx.drawImage(screen,0,0,48,64)}};
+  // ---- layout ----
+  let ctrlH=0;
+  function layout(){
+    const W=innerWidth,H=innerHeight,cw=screen.width,ch=screen.height;
+    document.body.classList.toggle('nopad',!cfg.pad);
+    document.body.classList.toggle('smooth',!!cfg.smooth);
+    $('bg').style.display=cfg.amb?'block':'none';
+    const portrait=H>W*1.02;
+    ctrlH=0;
+    if(cfg.pad){
+      if(portrait){ctrlH=Math.max(170,Math.min(300,H-W*ch/cw));ctrlH=Math.min(ctrlH,H*0.45)}
+      document.documentElement.style.setProperty('--u',Math.round(Math.max(42,Math.min(64,portrait?ctrlH/3.6:Math.min(H/6,58))))+'px');
+    }
+    const pb=$('padbg');pb.style.display=cfg.pad&&portrait?'block':'none';pb.style.height=ctrlH+'px';
+    const aw=W,ah=H-ctrlH;
+    let s=Math.min(aw/cw,ah/ch);
+    if(cfg.mode==='int'&&s>=1)s=Math.floor(s);
+    else if(cfg.mode==='fill')s=aw/cw;
+    const dw=cw*s,dh=ch*s;
+    screen.style.width=dw+'px';screen.style.height=dh+'px';
+    view.style.width=dw+'px';view.style.height=dh+'px';
+    view.style.left=(aw-dw)/2+'px';view.style.top=Math.max(0,(ah-dh)/2)+'px';
+    // зум/сдвиг
+    const mx=Math.max(0,dw*cfg.uz-aw)/2+dw*.15*(cfg.uz>1?1:0),my=Math.max(0,dh*cfg.uz-ah)/2+dh*.15*(cfg.uz>1?1:0);
+    cfg.px=Math.max(-mx,Math.min(mx,cfg.px));cfg.py=Math.max(-my,Math.min(my,cfg.py));
+    view.style.transform=`translate(${cfg.px}px,${cfg.py}px) scale(${cfg.uz})`;
+    $('bz').hidden=cfg.uz<=1.01;
+    const kb=$('keys');kb.style.bottom=(ctrlH?ctrlH+8:'calc(var(--sab) + 140px)')+(ctrlH?'px':'');
+  }
+  addEventListener('resize',layout);addEventListener('orientationchange',()=>setTimeout(layout,200));
+  // ---- zoom api for gestures ----
+  const zoom={get:()=>({uz:cfg.uz,px:cfg.px,py:cfg.py}),
+    set:(uz,px,py)=>{cfg.uz=Math.max(1,Math.min(5,uz));cfg.px=cfg.uz<=1.01?0:px;cfg.py=cfg.uz<=1.01?0:py;layout()}};
+  $('bz').onclick=()=>zoom.set(1,0,0);
+  // ---- keys ----
+  const vib=()=>{if(cfg.vib&&navigator.vibrate)try{navigator.vibrate(8)}catch(e){}};
+  const key=(d,k)=>{RT.midi.unlock();RT.key(d,k)};
+  const G=createGestures({cw:()=>screen.width,ch:()=>screen.height,rect:()=>view.getBoundingClientRect(),cfg:()=>({step:cfg.step,tapSlop:8}),vib,key,zoom,now:()=>performance.now()});
+  const wire=el=>{
+    el.addEventListener('pointerdown',e=>{e.preventDefault();try{el.setPointerCapture(e.pointerId)}catch(_){}G.down(e)});
+    el.addEventListener('pointermove',e=>{e.preventDefault();G.move(e)});
+    el.addEventListener('pointerup',e=>{e.preventDefault();G.up(e)});
+    el.addEventListener('pointercancel',e=>G.cancel(e));
+  };
+  wire(view);
+  addEventListener('wheel',e=>{e.preventDefault();const f=e.deltaY<0?1.12:1/1.12;zoom.set(cfg.uz*f,cfg.px,cfg.py)},{passive:false});
+  document.addEventListener('gesturestart',e=>e.preventDefault());
+  document.addEventListener('contextmenu',e=>e.preventDefault());
+  // ---- on-screen buttons ----
+  document.querySelectorAll('[data-k]').forEach(b=>{
+    if(b.closest('#card'))return;
+    const k=+b.dataset.k;
+    b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();try{b.setPointerCapture(e.pointerId)}catch(_){}b.classList.add('on');vib();key(true,k)});
+    const r=e=>{if(b.classList.contains('on')){b.classList.remove('on');key(false,k)}};
+    b.addEventListener('pointerup',r);b.addEventListener('pointercancel',r);b.addEventListener('lostpointercapture',r);
+  });
+  $('bkeys').addEventListener('click',()=>$('keys').classList.toggle('show'));
+  // ---- keyboard ----
+  const MAP={ArrowUp:-1,ArrowDown:-2,ArrowLeft:-3,ArrowRight:-4,Enter:-5,Space:-5,F1:-6,KeyQ:-6,F2:-7,KeyW:-7,
+    KeyE:42,NumpadMultiply:42,KeyR:35,NumpadDivide:35,
+    Numpad1:55,Numpad2:56,Numpad3:57,Numpad4:52,Numpad5:53,Numpad6:54,Numpad7:49,Numpad8:50,Numpad9:51,Numpad0:48};
+  for(let i=0;i<10;i++)MAP['Digit'+i]=48+i;
+  const held=new Set();
+  function kd(e,down){
+    if($('set').classList.contains('show')){if(e.code==='Escape'&&down)closeSet();return}
+    const k=MAP[e.code];if(k===undefined)return;
+    e.preventDefault();
+    if(down){if(held.has(k)&&e.repeat)return;held.add(k)}else held.delete(k);
+    key(down,k);
+  }
+  addEventListener('keydown',e=>kd(e,true));addEventListener('keyup',e=>kd(e,false));
+  // ---- settings UI ----
+  function seg(id,get,set){
+    const el=$(id);const upd=()=>el.querySelectorAll('button').forEach(b=>b.classList.toggle('sel',String(get())===b.dataset.v));
+    el.querySelectorAll('button').forEach(b=>b.onclick=()=>{set(b.dataset.v);save();upd();layout()});upd();return upd;
+  }
+  const ups=[
+    seg('s-mode',()=>cfg.mode,v=>cfg.mode=v),
+    seg('s-smooth',()=>cfg.smooth,v=>cfg.smooth=+v),
+    seg('s-ext',()=>cfg.ext,v=>{cfg.ext=+v;RT.setView(!!cfg.ext)}),
+    seg('s-amb',()=>cfg.amb,v=>cfg.amb=+v),
+    seg('s-pad',()=>cfg.pad,v=>cfg.pad=+v),
+    seg('s-vib',()=>cfg.vib,v=>cfg.vib=+v)];
+  const rs=$('r-step');rs.value=cfg.step;rs.oninput=()=>{cfg.step=+rs.value;save()};
+  $('z-').onclick=()=>zoom.set(cfg.uz/1.25,cfg.px,cfg.py);$('z+').onclick=()=>zoom.set(cfg.uz*1.25,cfg.px,cfg.py);$('z0').onclick=()=>zoom.set(1,0,0);
+  function openSet(){$('set').classList.add('show')}function closeSet(){$('set').classList.remove('show');save()}
+  $('bset').onclick=openSet;$('b-close').onclick=closeSet;
+  $('set').addEventListener('pointerdown',e=>{if(e.target===$('set'))closeSet()});
+  $('bfs').onclick=()=>{const d=document,r=d.documentElement;
+    if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d)}
+    else{const f=r.requestFullscreen||r.webkitRequestFullscreen;if(f)f.call(r);else alert('Полный экран не поддерживается этим браузером. На iPhone: «Поделиться» → «На экран Домой».')}};
+  document.addEventListener('fullscreenchange',()=>setTimeout(layout,100));
+  // ---- run ----
+  document.addEventListener('visibilitychange',()=>{RT.dirty=true});
+  layout();
+  (function loop(){RT.frame();requestAnimationFrame(loop)})();
+  RT.boot().then(layout).catch(e=>console.error('boot failed',e));
+})();
+</script>
+</body>
+</html>
