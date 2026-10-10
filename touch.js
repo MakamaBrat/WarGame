@@ -34,7 +34,8 @@
       const was=mode,s=S;P.delete(e.pointerId);
       if(was==="one"&&P.size===0&&s&&!s.moved){
         const cw=o.cw(),ch=o.ch();
-        if(s.gy>ch-36&&s.gx<56)tapKey(SL);else if(s.gy>ch-36&&s.gx>cw-56)tapKey(SR);else tapKey(OK);
+        if(s.gy>ch-36&&s.gx<56)tapKey(SL);else if(s.gy>ch-36&&s.gx>cw-56)tapKey(SR);
+        else{if(o.tapMap)o.tapMap(s.gx,s.gy);tapKey(OK)}
       }
       if(P.size===0){mode="none";S=null}else if(was==="pinch"){mode="none"}
     }

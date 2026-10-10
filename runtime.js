@@ -34,7 +34,7 @@ def("javax/microedition/io/ConnectionNotFoundException",IOE);
 const RSE=def("javax/microedition/rms/RecordStoreException",P["java/lang/Exception"]);
 for(const n of["RecordStoreNotFoundException","RecordStoreFullException","InvalidRecordIDException","RecordStoreNotOpenException","RecordStoreExistsException"])def("javax/microedition/rms/"+n,RSE);
 def("javax/microedition/media/MediaException",P["java/lang/Exception"]);
-const mkex=(n,m)=>{const e=new P[n]();e.msg=m;return e};
+const mkex=(n,m)=>{const e=new P[n]();e.msg=m;if(RT.debug)console.warn("[throw]",n,m,(new Error().stack.split("\n")[3]||"").trim());return e};
 function wex(e){
   if(e instanceof T)return e;
   if(RT.debug)console.warn("[js error]",e);
@@ -202,26 +202,36 @@ RT.decodePNG=decodePNG;
 // ---------- lcdui ----------
 const mkCanvas=(w,h)=>{const c=env().makeCanvas(w,h);const x=c.getContext("2d",{willReadFrequently:true});x.imageSmoothingEnabled=false;return c};
 const hex=n=>"#"+(n&0xFFFFFF).toString(16).padStart(6,"0");
+RT.M=0; // режим привязки оверлея: 0 нет, 1 верх-лево, 2 низ-центр, 3 центр
+const offs=(x)=>{const dx=RT.V.w-240,dy=RT.V.h-320;const m=RT.M;return m===2?[dx>>1,dy]:(m===3||m===4)?[dx>>1,dy>>1]:m===5?[(x!=null&&x>=135)?dx:0,dy]:m===6?(RT.T||[0,0]):[0,0]};
+// Заполнение полей вокруг фона меню растяжением краёв окна 240x320 (фон сдвинут на смещение режима 4)
+RT.edgeFill=img=>{const dx=RT.V.w-240,dy=RT.V.h-320;if(dx<=0&&dy<=0)return;const ox=dx>>1,oy=dy>>1,W=RT.V.w+30,H=RT.V.h+20,c=img.cv.getContext("2d"),cv=img.cv;
+  const x0=15+ox,x1=255+ox,y0=10+oy,y1=330+oy;
+  if(x0>0)c.drawImage(cv,x0,0,1,H,0,0,x0,H);if(x1<W)c.drawImage(cv,x1-1,0,1,H,x1,0,W-x1,H);
+  if(y0>0)c.drawImage(cv,0,y0,W,1,0,0,W,y0);if(y1<H)c.drawImage(cv,0,y1-1,W,1,0,y1,W,H-y1)};
 const Gfx=def("javax/microedition/lcdui/Graphics",null,[],{
   init(ctx){this.x=ctx;ctx.save();this.c="#000000";this.fs=null},
   fs_(){if(this.fs!==this.c){this.x.fillStyle=this.c;this.fs=this.c}},
   ["setColor(I)V"](c){this.c=hex(c)},
   ["setColor(III)V"](r,gg,b){this.c=hex((r&255)<<16|(gg&255)<<8|(b&255))},
-  ["fillRect(IIII)V"](x,y,w,h){if(w<=0||h<=0)return;this.fs_();this.x.fillRect(x,y,w,h)},
-  ["drawRect(IIII)V"](x,y,w,h){if(w<0||h<0)return;this.fs_();const c=this.x;c.fillRect(x,y,w+1,1);if(h>0)c.fillRect(x,y+h,w+1,1);if(h>1){c.fillRect(x,y+1,1,h-1);if(w>0)c.fillRect(x+w,y+1,1,h-1)}},
-  ["drawLine(IIII)V"](x1,y1,x2,y2){this.fs_();const c=this.x;
+  ["fillRect(IIII)V"](x,y,w,h){if(RT.M){const o=offs(x);x+=o[0];y+=o[1]}if(w<=0||h<=0)return;this.fs_();this.x.fillRect(x,y,w,h)},
+  ["drawRect(IIII)V"](x,y,w,h){if(RT.M){const o=offs(x);x+=o[0];y+=o[1]}if(w<0||h<0)return;this.fs_();const c=this.x;c.fillRect(x,y,w+1,1);if(h>0)c.fillRect(x,y+h,w+1,1);if(h>1){c.fillRect(x,y+1,1,h-1);if(w>0)c.fillRect(x+w,y+1,1,h-1)}},
+  ["drawLine(IIII)V"](x1,y1,x2,y2){if(RT.M){const o=offs(x1);x1+=o[0];x2+=o[0];y1+=o[1];y2+=o[1]}this.fs_();const c=this.x;
     if(y1===y2){c.fillRect(Math.min(x1,x2),y1,Math.abs(x2-x1)+1,1);return}
     if(x1===x2){c.fillRect(x1,Math.min(y1,y2),1,Math.abs(y2-y1)+1);return}
     let dx=Math.abs(x2-x1),dy=-Math.abs(y2-y1),sx=x1<x2?1:-1,sy=y1<y2?1:-1,e=dx+dy;
     for(;;){c.fillRect(x1,y1,1,1);if(x1===x2&&y1===y2)break;const e2=2*e;if(e2>=dy){e+=dy;x1+=sx}if(e2<=dx){e+=dx;y1+=sy}}},
-  ["setClip(IIII)V"](x,y,w,h){const c=this.x;c.restore();c.save();this.fs=null;c.beginPath();c.rect(x,y,Math.max(0,w),Math.max(0,h));c.clip()},
-  ["drawImage(Ljavax/microedition/lcdui/Image;III)V"](im,x,y,a){const p=anch(x,y,im.w,im.h,a);this.x.drawImage(im.cv,p[0],p[1])},
-  ["drawRegion(Ljavax/microedition/lcdui/Image;IIIIIIII)V"](im,sx,sy,w,h,tr,dx,dy,a){
+  ["setClip(IIII)V"](x,y,w,h){if(w===500&&h===500){x=0;y=0;w=h=100000}if(RT.M===6)return;if(RT.M&&w<400){const o=offs(x);x+=o[0];y+=o[1]}const c=this.x;c.restore();c.save();this.fs=null;c.beginPath();c.rect(x,y,Math.max(0,w),Math.max(0,h));c.clip()},
+  ["drawImage(Ljavax/microedition/lcdui/Image;III)V"](im,x,y,a){if(RT.M){const o=offs(x);x+=o[0];y+=o[1]}const p=anch(x,y,im.w,im.h,a);this.x.drawImage(im.cv,p[0],p[1])},
+  ["drawRegion(Ljavax/microedition/lcdui/Image;IIIIIIII)V"](im,sx,sy,w,h,tr,dx,dy,a){if(RT.M){const o=offs(dx);dx+=o[0];dy+=o[1]}
     if(w<=0||h<=0)return;const c=this.x,sw=tr>=4?h:w,sh=tr>=4?w:h,p=anch(dx,dy,sw,sh,a);
     if(tr===0){c.drawImage(im.cv,sx,sy,w,h,p[0],p[1],w,h);return}
     c.save();c.translate(p[0],p[1]);
     const M=[null,[1,0,0,-1,0,h],[-1,0,0,1,w,0],[-1,0,0,-1,w,h],[0,1,1,0,0,0],[0,1,-1,0,h,0],[0,-1,1,0,0,w],[0,-1,-1,0,h,w]][tr];
     c.transform(...M);c.drawImage(im.cv,sx,sy,w,h,0,0,w,h);c.restore()}});
+for(const k of Object.keys(Gfx.prototype).filter(k=>/^(fillRect|drawRect|drawLine|drawImage|drawRegion)/.test(k))){
+  const f=Gfx.prototype[k];Gfx.prototype[k]=function(...a){if(RT.M!==6)return f.apply(this,a);
+    for(let ty=0;ty*320<RT.V.h;ty++)for(let tx=0;tx*240<RT.V.w;tx++){RT.T=[tx*240,ty*320];f.apply(this,a)}RT.T=null}}
 function anch(x,y,w,h,a){if(a&1)x-=w>>1;else if(a&8)x-=w;if(a&2)y-=h>>1;else if(a&32)y-=h;return[x,y]}
 const Img=def("javax/microedition/lcdui/Image",null,[],{
   ["getWidth()I"](){return this.w},["getHeight()I"](){return this.h},
@@ -258,11 +268,12 @@ RT.frame=async()=>{
   try{await RT.q;await RT.current["paint(Ljavax/microedition/lcdui/Graphics;)V"](RT.screenG)}catch(e){console.error("[paint]",e)}
   RT.painting=false;if(env().onFrame)env().onFrame();
 };
-// ext=true: показываем весь буфер игры 270x340 (запас карты за краями обычного окна 240x320)
-RT.setView=ext=>{const sc=env().screen;sc.width=ext?270:240;sc.height=ext?340:320;const c=sc.getContext("2d");
-  c.imageSmoothingEnabled=false;if(ext)c.translate(15,10);const G=new Gfx();G.init(c);RT.screenG=G;RT.ext=!!ext;RT.dirty=true};
+// Размер игрового вида: RT.V = {cols, rows, w, h}; w=cols*30, h=rows*20 (тайлы 30x20). По умолчанию как у оригинала.
+RT.V=RT.V||{cols:8,rows:16,w:240,h:320};
+RT.setView=()=>{const sc=env().screen;sc.width=RT.V.w;sc.height=RT.V.h;const c=sc.getContext("2d");
+  c.imageSmoothingEnabled=false;const G=new Gfx();G.init(c);RT.screenG=G;RT.dirty=true};
 RT.boot=async()=>{
-  RT.setView(!!env().ext);
+  RT.setView();
   for(const C of RT.clinits){const r=C["<clinit>()V"]();if(r&&r.then)await r}
   const M=RT.classes["aow2"],m=new M();await m["<init>()V"]();RT.midlet=m;
   RT.q=RT.q.then(()=>m["startApp()V"]()).catch(e=>console.error("[startApp]",e));

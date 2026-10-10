@@ -133,8 +133,8 @@ s2=50;
 s1=$mna("[[B",[s1,s2]);
 s0["W:[[B"]=s1;
 s0=l0;
-s1=18;
-s2=11;
+s1=(RT.V.rows+2);
+s2=(RT.V.cols+3);
 s1=$mna("[[B",[s1,s2]);
 s0["X:[[B"]=s1;
 s0=l0;
@@ -481,8 +481,8 @@ s1=1;
 s0=$ld(s0,s1);
 s1=0;
 s2=0;
-s3=270;
-s4=340;
+s3=(RT.V.w+30);
+s4=(RT.V.h+20);
 s0["fillRect(IIII)V"](s1,s2,s3,s4);
 s0=l0;
 s0=s0["u:[Ljavax/microedition/lcdui/Graphics;"];
@@ -1609,8 +1609,8 @@ case 40:bpc=40;
 s0=l0;
 s0=s0["t:[Ljavax/microedition/lcdui/Image;"];
 s1=1;
-s2=270;
-s3=340;
+s2=(RT.V.w+30);
+s3=(RT.V.h+20);
 s2=K_javax_microedition_lcdui_Image["createImage(II)Ljavax/microedition/lcdui/Image;"](s2,s3);
 $st(s0,s1,s2);
 s0=l0;
@@ -1632,8 +1632,8 @@ s0=l0;
 s0=l0;
 s0=s0["t:[Ljavax/microedition/lcdui/Image;"];
 s1=0;
-s2=270;
-s3=340;
+s2=(RT.V.w+30);
+s3=(RT.V.h+20);
 s2=K_javax_microedition_lcdui_Image["createImage(II)Ljavax/microedition/lcdui/Image;"](s2,s3);
 $st(s0,s1,s2);
 s0=l0;
@@ -11608,7 +11608,7 @@ s2=1;
 s1=(s1-s2)|0;
 s1=s1<<24>>24;
 s0["e:B"]=s1;
-s0=10;
+s0=(RT.V.cols+2);
 l1=s0;
 case 61:
 s0=l1;
@@ -11617,7 +11617,7 @@ s0=0;
 l2=s0;
 case 67:
 s0=l2;
-s1=18;
+s1=(RT.V.rows+2);
 if(s0>=s1){pc=97;continue L;}
 s0=l0;
 s0=s0["bm:[[B"];
@@ -11643,7 +11643,7 @@ s0=0;
 l1=s0;
 case 105:
 s0=l1;
-s1=18;
+s1=(RT.V.rows+2);
 if(s0>=s1){pc=126;continue L;}
 s0=l0;
 s0=s0["bm:[[B"];
@@ -11688,7 +11688,7 @@ s1=2;
 s0=$ld(s0,s1);
 s1=l1;
 s0=$ld(s0,s1);
-s1=11;
+s1=(RT.V.cols+3);
 if(s0<s1){pc=194;continue L;}
 s0=l0;
 s0=s0["bl:[[B"];
@@ -11755,7 +11755,7 @@ if(s1<0){pc=31;continue L;}
 s1=l0;
 s1=s1["a:La;"];
 s1=s1["aG:[[B"];
-s2=18;
+s2=(RT.V.rows+2);
 s1=$ld(s1,s2);
 s2=l0;
 s2=s2["ad:B"];
@@ -11788,7 +11788,7 @@ if(s1<0){pc=87;continue L;}
 s1=l0;
 s1=s1["a:La;"];
 s1=s1["aG:[[B"];
-s2=18;
+s2=(RT.V.rows+2);
 s1=$ld(s1,s2);
 s2=l0;
 s2=s2["ad:B"];
@@ -11803,7 +11803,7 @@ s0=(s0+s1)|0;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 s2=1;
 s1=(s1-s2)|0;
@@ -11811,7 +11811,7 @@ if(s0<s1){pc=316;continue L;}
 s0=l0;
 s0=s0["b:Lg;"];
 s0=s0["e:B"];
-s1=8;
+s1=RT.V.cols;
 s0=(s0+s1)|0;
 s1=l0;
 s1=s1["b:Lg;"];
@@ -11829,13 +11829,13 @@ s0=0;
 l1=s0;
 case 140:
 s0=l1;
-s1=10;
+s1=(RT.V.cols+2);
 if(s0>=s1){pc=184;continue L;}
 s0=0;
 l2=s0;
 case 148:
 s0=l2;
-s1=18;
+s1=(RT.V.rows+2);
 if(s0>=s1){pc=178;continue L;}
 s0=l0;
 s0=s0["bm:[[B"];
@@ -11861,13 +11861,13 @@ s0=0;
 l1=s0;
 case 186:
 s0=l1;
-s1=18;
+s1=(RT.V.rows+2);
 if(s0>=s1){pc=208;continue L;}
 s0=l0;
 s0=s0["bm:[[B"];
 s1=l1;
 s0=$ld(s0,s1);
-s1=10;
+s1=(RT.V.cols+2);
 s2=-1;
 $st(s0,s1,s2);
 l1=(l1+(1))|0;
@@ -11998,9 +11998,9 @@ s0=0;
 l1=s0;
 case 60:
 s0=l1;
-s1=11;
+s1=(RT.V.cols+3);
 if(s0>=s1){pc=103;continue L;}
-s0=17;
+s0=(RT.V.rows+1);
 l2=s0;
 case 69:
 s0=l2;
@@ -12029,7 +12029,7 @@ s0=0;
 l1=s0;
 case 105:
 s0=l1;
-s1=11;
+s1=(RT.V.cols+3);
 if(s0>=s1){pc=126;continue L;}
 s0=l0;
 s0=s0["bm:[[B"];
@@ -12074,7 +12074,7 @@ s1=3;
 s0=$ld(s0,s1);
 s1=l1;
 s0=$ld(s0,s1);
-s1=18;
+s1=(RT.V.rows+2);
 if(s0<s1){pc=194;continue L;}
 s0=l0;
 s0=s0["bl:[[B"];
@@ -12219,13 +12219,13 @@ s0=0;
 l1=s0;
 case 150:
 s0=l1;
-s1=11;
+s1=(RT.V.cols+3);
 if(s0>=s1){pc=194;continue L;}
 s0=0;
 l2=s0;
 case 158:
 s0=l2;
-s1=17;
+s1=(RT.V.rows+1);
 if(s0>=s1){pc=188;continue L;}
 s0=l0;
 s0=s0["bm:[[B"];
@@ -12251,11 +12251,11 @@ s0=0;
 l1=s0;
 case 196:
 s0=l1;
-s1=11;
+s1=(RT.V.cols+3);
 if(s0>=s1){pc=218;continue L;}
 s0=l0;
 s0=s0["bm:[[B"];
-s1=17;
+s1=(RT.V.rows+1);
 s0=$ld(s0,s1);
 s1=l1;
 s2=-1;
@@ -12987,7 +12987,7 @@ s2=(s2+s3)|0;
 s3=l0;
 s3=s3["b:Lg;"];
 s3=s3["e:B"];
-s4=8;
+s4=RT.V.cols;
 s3=(s3+s4)|0;
 s4=l0;
 s4=s4["a:La;"];
@@ -13707,13 +13707,13 @@ s0=l0;
 s0=s0["b:Lg;"];
 s1=l0;
 s1=s1["P:B"];
-s2=4;
+s2=(RT.V.cols>>1);
 s1=(s1-s2)|0;
 s2=0;
 s3=l0;
 s3=s3["b:Lg;"];
 s3=s3["c:B"];
-s4=8;
+s4=RT.V.cols;
 s3=(s3-s4)|0;
 s1=J_g["a(III)I"](s1,s2,s3);
 s1=s1<<24>>24;
@@ -17044,7 +17044,7 @@ s2=s2["f:B"];
 s3=l0;
 s3=s3["b:Lg;"];
 s3=s3["e:B"];
-s4=8;
+s4=RT.V.cols;
 s3=(s3+s4)|0;
 s4=1;
 s3=(s3-s4)|0;
@@ -17230,7 +17230,7 @@ s1=(s1-s2)|0;
 s2=30;
 s1=Math.imul(s1,s2);
 s2=0;
-s3=240;
+s3=RT.V.w;
 s4=27;
 s5=l0;
 s5=s5["ay:I"];
@@ -20520,13 +20520,13 @@ s0=l0;
 s0=s0["b:Lg;"];
 s1=l0;
 s1=s1["P:B"];
-s2=4;
+s2=(RT.V.cols>>1);
 s1=(s1-s2)|0;
 s2=0;
 s3=l0;
 s3=s3["b:Lg;"];
 s3=s3["c:B"];
-s4=8;
+s4=RT.V.cols;
 s3=(s3-s4)|0;
 s1=J_g["a(III)I"](s1,s2,s3);
 s1=s1<<24>>24;
@@ -20581,13 +20581,13 @@ if(s0<0){pc=8;continue L;}
 s0=0;
 {pc=10;continue L;}
 case 8:
-s0=10;
+s0=(RT.V.cols+2);
 case 10:
 l3=s0;
 s0=l1;
 if(s0<0){pc=21;continue L;}
 s0=l3;
-s1=11;
+s1=(RT.V.cols+3);
 if(s0<s1){pc=29;continue L;}
 case 21:
 s0=l1;
@@ -20600,13 +20600,13 @@ if(s0<0){pc=37;continue L;}
 s0=0;
 {pc=39;continue L;}
 case 37:
-s0=17;
+s0=(RT.V.rows+1);
 case 39:
 l4=s0;
 s0=l2;
 if(s0<0){pc=52;continue L;}
 s0=l4;
-s1=18;
+s1=(RT.V.rows+2);
 if(s0<s1){pc=61;continue L;}
 case 52:
 s0=l2;
@@ -20625,12 +20625,12 @@ if(s0<0){pc=116;continue L;}
 s0=l3;
 s1=l1;
 s0=(s0+s1)|0;
-s1=11;
+s1=(RT.V.cols+3);
 if(s0>=s1){pc=116;continue L;}
 s0=l4;
 s1=l2;
 s0=(s0+s1)|0;
-s1=18;
+s1=(RT.V.rows+2);
 if(s0>=s1){pc=116;continue L;}
 s0=l0;
 s0=s0["bm:[[B"];
@@ -20738,7 +20738,7 @@ s1=2;
 s0=$ld(s0,s1);
 s1=l3;
 s0=$ld(s0,s1);
-s1=11;
+s1=(RT.V.cols+3);
 if(s0>=s1){pc=252;continue L;}
 s0=l0;
 s0=s0["bl:[[B"];
@@ -20746,7 +20746,7 @@ s1=3;
 s0=$ld(s0,s1);
 s1=l3;
 s0=$ld(s0,s1);
-s1=18;
+s1=(RT.V.rows+2);
 if(s0<s1){pc=271;continue L;}
 case 252:
 s0=l0;
@@ -21009,7 +21009,7 @@ s0=l2;
 if(s0!==0){pc=338;continue L;}
 s0=l0;
 s0=s0["b:Lg;"];
-s1=15;
+s1=(RT.V.rows-1);
 s0["g:B"]=s1;
 case 338:
 s0=l2;
@@ -21017,7 +21017,7 @@ s1=1;
 if(s0<s1){pc=388;continue L;}
 s0=l0;
 s0=s0["b:Lg;"];
-s1=16;
+s1=RT.V.rows;
 s0["g:B"]=s1;
 s0=l0;
 s0=s0["aD:I"];
@@ -21046,7 +21046,7 @@ let s0,s1,s2,s3,s4,s5,s6;
 let pc=0;
 L:for(;;){switch(pc){
 case 0:
-s0=l0;
+RT.M=0;s0=l0;
 s1=1;
 s0["bs:Z"]=s1;
 s0=l0;
@@ -21079,10 +21079,10 @@ s2=l0;
 s2=s2["a:La;"];
 s2=s2["z:Z"];
 if(s2===0){pc=71;continue L;}
-s2=320;
+s2=RT.V.h;
 {pc=74;continue L;}
 case 71:
-s2=290;
+s2=(RT.V.h-30);
 case 74:
 s3=20;
 s2=$irem(s2,s3);
@@ -21161,14 +21161,14 @@ s2=0;
 {const t0=s1;const t1=s2;s1=t1;s2=t0;s3=t1;}
 s2["bv:I"]=s3;
 s0["bu:I"]=s1;
-s0=l0;
+RT.M=1;s0=l0;
 s1=133;
 s2=0;
 s3=0;
 s4=1;
 s5=0;
 s0["a(IIIII)V"](s1,s2,s3,s4,s5);
-s0=l0;
+RT.M=2;s0=l0;
 s1=134;
 s2=0;
 s3=320;
@@ -21177,20 +21177,20 @@ s5=0;
 s0["a(IIIII)V"](s1,s2,s3,s4,s5);
 s0=l1;
 if(s0!==0){pc=238;continue L;}
-s0=l0;
+RT.M=6;s0=l0;
 s1=2103;
 s2=0;
 s3=0;
 s0["a(III)V"](s1,s2,s3);
 case 238:
-s0=l0;
+RT.M=5;s0=l0;
 s1=144;
 s2=0;
 s3=320;
 s4=1;
 s5=0;
 s0["a(IIIII)V"](s1,s2,s3,s4,s5);
-s0=l0;
+RT.M=3;s0=l0;
 s0=s0["am:S"];
 if(s0<0){pc=281;continue L;}
 s0=l1;
@@ -21204,9 +21204,9 @@ s4=l0;
 s4=s4["ak:B"];
 s5=-1;
 J_e.prototype["o(IIIII)V"].call(s0,s1,s2,s3,s4,s5);
-return;
+RT.M=0;return;
 case 281:
-s0=l0;
+RT.M=(l0["ai:S"]===145?0:3);s0=l0;
 s0=s0["ai:S"];
 if(s0<0){pc=341;continue L;}
 s0=l1;
@@ -21238,7 +21238,7 @@ s4=1;
 s5=0;
 s0["a(IIIII)V"](s1,s2,s3,s4,s5);
 case 341:
-return;
+RT.M=0;return;
 }}
 }
 "T()V"(){
@@ -21318,7 +21318,7 @@ if(s0!==s1){pc=121;continue L;}
 s0=l0;
 s0=s0["b:Lg;"];
 s0=s0["e:B"];
-s1=8;
+s1=RT.V.cols;
 s0=(s0+s1)|0;
 s1=2;
 s0=(s0-s1)|0;
@@ -21344,7 +21344,7 @@ case 150:
 s0=l0;
 s0=s0["b:Lg;"];
 s0=s0["e:B"];
-s1=8;
+s1=RT.V.cols;
 s0=(s0+s1)|0;
 s1=1;
 s0=(s0+s1)|0;
@@ -21608,7 +21608,7 @@ s0=l6;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 s2=1;
 s1=(s1+s2)|0;
@@ -21685,7 +21685,7 @@ s0=l2;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 s2=1;
 s1=(s1+s2)|0;
@@ -21719,7 +21719,7 @@ s0=l2;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 s2=1;
 s1=(s1+s2)|0;
@@ -21848,7 +21848,7 @@ s0=l2;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 s2=1;
 s1=(s1+s2)|0;
@@ -21929,7 +21929,7 @@ s0=l2;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>=s1){pc=615;continue L;}
 s0=l1;
@@ -22033,7 +22033,7 @@ s0=l2;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 s2=1;
 s1=(s1+s2)|0;
@@ -22075,7 +22075,7 @@ s0=l2;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>s1){pc=774;continue L;}
 s0=l1;
@@ -22472,7 +22472,7 @@ s0=l4;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 s2=1;
 s1=(s1+s2)|0;
@@ -22636,7 +22636,7 @@ s0=(s0+s1)|0;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 s2=1;
 s1=(s1+s2)|0;
@@ -22749,7 +22749,7 @@ s0=l4;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 s2=1;
 s1=(s1+s2)|0;
@@ -25645,7 +25645,7 @@ l1=s0;
 s0=l0;
 s0=s0["b:Lg;"];
 s0=s0["e:B"];
-s1=8;
+s1=RT.V.cols;
 s0=(s0+s1)|0;
 s1=l0;
 s1=s1["P:B"];
@@ -32154,7 +32154,7 @@ let s0,s1,s2,s3,s4,s5,s6;
 let pc=0;
 L:for(;;){switch(pc){
 case 0:
-s0=l0;
+RT.M=0;s0=l0;
 s0=s0["O:B"];
 s1=-1;
 if(s0===s1){pc=94;continue L;}
@@ -32198,12 +32198,12 @@ s1=0;
 s0["aO:Z"]=s1;
 {pc=89;continue L;}
 case 75:
-s0=l0;
+RT.M=4;s0=l0;
 s1=2105;
 s2=0;
 s3=0;
 s0["a(III)V"](s1,s2,s3);
-s0=l0;
+RT.M=0;RT.edgeFill(l0["a:La;"]["t:[Ljavax/microedition/lcdui/Image;"][0]);s0=l0;
 s1=1;
 s0["aO:Z"]=s1;
 case 89:
@@ -32228,7 +32228,7 @@ s2=0;
 s3=0;
 s4=0;
 s0["drawImage(Ljavax/microedition/lcdui/Image;III)V"](s1,s2,s3,s4);
-s0=l0;
+RT.M=3;s0=l0;
 s0=s0["am:S"];
 if(s0<0){pc=151;continue L;}
 s0=l0;
@@ -32391,14 +32391,14 @@ s4=1;
 s5=0;
 s0["a(IIIII)V"](s1,s2,s3,s4,s5);
 case 422:
-s0=l0;
+RT.M=5;s0=l0;
 s1=144;
 s2=0;
 s3=320;
 s4=1;
 s5=0;
 s0["a(IIIII)V"](s1,s2,s3,s4,s5);
-return;
+RT.M=0;return;
 }}
 }
 "c(III)Z"(l1,l2,l3){
@@ -32957,7 +32957,7 @@ s0=l2;
 s1=l0;
 s1=s1["b:Lg;"];
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>=s1){pc=760;continue L;}
 s0=l3;
@@ -42766,7 +42766,7 @@ let s0,s1,s2,s3,s4,s5,s6,s7,s8;
 s0=l0;
 K_java_lang_Object.prototype["<init>()V"].call(s0);
 s0=l0;
-s1=16;
+s1=RT.V.rows;
 s0["g:B"]=s1;
 s0=l0;
 s1=new K_java_util_Random();
@@ -42784,8 +42784,8 @@ s1=400;
 s1=$na(9,s1);
 s0["x:[S"]=s1;
 s0=l0;
-s1=18;
-s2=10;
+s1=(RT.V.rows+2);
+s2=(RT.V.cols+2);
 s1=$mna("[[S",[s1,s2]);
 s0["y:[[S"]=s1;
 s0=l0;
@@ -44224,7 +44224,7 @@ s0["aU:I"]=s1;
 case 302:bpc=302;
 s0=l0;
 s0=s0["aU:I"];
-s1=10;
+s1=(RT.V.cols+2);
 if(s0>=s1){pc=366;continue L;}
 s0=l0;
 s1=0;
@@ -44232,7 +44232,7 @@ s0["aV:I"]=s1;
 case 316:bpc=316;
 s0=l0;
 s0=s0["aV:I"];
-s1=18;
+s1=(RT.V.rows+2);
 if(s0>=s1){pc=353;continue L;}
 s0=l0;
 s0=s0["y:[[S"];
@@ -58105,7 +58105,7 @@ if(s0<s1){pc=420;continue L;}
 s0=l5;
 s1=l0;
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>=s1){pc=420;continue L;}
 s0=l6;
@@ -58808,7 +58808,7 @@ s0["aU:I"]=s1;
 case 5:
 s0=l0;
 s0=s0["aU:I"];
-s1=10;
+s1=(RT.V.cols+2);
 if(s0>=s1){pc=69;continue L;}
 s0=l0;
 s1=0;
@@ -58816,7 +58816,7 @@ s0["aV:I"]=s1;
 case 19:
 s0=l0;
 s0=s0["aV:I"];
-s1=18;
+s1=(RT.V.rows+2);
 if(s0>=s1){pc=56;continue L;}
 s0=l0;
 s0=s0["y:[[S"];
@@ -58886,7 +58886,7 @@ s1=s1["aV:I"];
 s0=$ld(s0,s1);
 s1=l0;
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>s1){pc=283;continue L;}
 s0=l0;
@@ -59114,7 +59114,7 @@ if(s0<s1){pc=293;continue L;}
 s0=l1;
 s1=l0;
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>s1){pc=293;continue L;}
 s0=l2;
@@ -59192,7 +59192,7 @@ s1=l8;
 s0=$ld(s0,s1);
 s1=l0;
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>s1){pc=380;continue L;}
 s0=l0;
@@ -59477,7 +59477,7 @@ if(s0<s1){pc=321;continue L;}
 s0=l1;
 s1=l0;
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>s1){pc=321;continue L;}
 s0=l2;
@@ -59590,7 +59590,7 @@ if(s0<s1){pc=44;continue L;}
 s0=l1;
 s1=l0;
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>=s1){pc=44;continue L;}
 s0=l2;
@@ -59802,7 +59802,7 @@ s1=l1;
 s0=$ld(s0,s1);
 s1=l0;
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>=s1){pc=123;continue L;}
 s0=l0;
@@ -61876,7 +61876,7 @@ if(s0<=s1){pc=286;continue L;}
 s0=l3;
 s1=l0;
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>=s1){pc=286;continue L;}
 s0=l4;
@@ -62841,7 +62841,7 @@ if(s0<=s1){pc=418;continue L;}
 s0=l4;
 s1=l0;
 s1=s1["e:B"];
-s2=8;
+s2=RT.V.cols;
 s1=(s1+s2)|0;
 if(s0>=s1){pc=418;continue L;}
 s0=l5;

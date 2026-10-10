@@ -5,6 +5,14 @@
 (function(){
   const RT=window.RT;
   RT.seedRMS={"aow212": ["I7xu4QAAAAAEAP////8AAAIAAAAA//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8AAAAAAAAAAAAAAAAAAAADuyzD2AACBDhxJlMaXj1VDkQnYyFfEGUIVUIxbW4/YwhJFmAtXg1jCXQUVBhfPV4JWSdSCTpvEjlxJVcZUz1VPEQvWxBuP2AJRRZqG0MMZhggRCYoawpmCEkWZi1eDWAJdBRUGF89XgtZJ1IJOm8SOXAmUhlfAFcAAAAAAARk"]};
+  // Тап по карте -> курсор в клетку под пальцем (в состояниях игры aM=1 и 18). Возвращает true, если курсор поставлен.
+  RT.tapMap=function(gx,gy){
+    const e=RT.current&&RT.current["m:Le;"];if(!e||(e["aM:I"]!==1&&e["aM:I"]!==18)||e["am:S"]>=0)return false;
+    const g=e["b:Lg;"];
+    let tx=g["e:B"]+Math.floor(gx/30),ty=g["f:B"]+Math.floor(gy/20);
+    tx=Math.max(g["e:B"],Math.min(g["e:B"]+RT.V.cols-1,tx,g["c:B"]-1));ty=Math.max(g["f:B"],Math.min(g["f:B"]+RT.V.rows-1,ty,g["d:B"]-1));
+    e["P:B"]=tx;e["Q:B"]=ty;return true;
+  };
   let done=false;
   RT.beforeFrame=function(){
     if(done)return false;

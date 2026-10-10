@@ -65,19 +65,17 @@
   <button data-k="55">7</button><button data-k="56">8</button><button data-k="57">9</button>
   <button data-k="42">*</button><button data-k="48">0</button><button data-k="35">#</button>
 </div>
+<button id="refit" hidden style="position:fixed;left:50%;top:calc(var(--sat) + 8px);transform:translateX(-50%);z-index:8;padding:8px 14px">Окно изменилось — подогнать (перезапуск)</button>
 <div id="set"><div id="card">
   <h2>Настройки</h2>
-  <div class="row"><span>Масштаб</span><div class="seg" id="s-mode"><button data-v="fit">Вписать</button><button data-v="int">Пиксель</button><button data-v="fill">По ширине</button></div></div>
-  <div class="row"><span>Растянуть на весь экран</span><input type="range" id="r-str" min="0" max="100" step="5"></div>
-  <div class="row"><span>Зум</span><div class="seg"><button id="z-">−</button><button id="z+">+</button><button id="z0">1×</button></div></div>
+  <div class="row"><span>Масштаб игры<br><small style="margin:0">меньше — больше карты на экране (перезапуск)</small></span><span><span id="zv">auto</span> <input type="range" id="r-zoom" min="1" max="3" step="0.25"></span></div>
+  <div class="row"><span>Лупа</span><div class="seg"><button id="z-">−</button><button id="z+">+</button><button id="z0">1×</button></div></div>
   <div class="row"><span>Картинка</span><div class="seg" id="s-smooth"><button data-v="0">Чёткая</button><button data-v="1">Гладкая</button></div></div>
-  <div class="row"><span>Больше карты (270×340)</span><div class="seg" id="s-ext"><button data-v="0">Выкл</button><button data-v="1">Вкл</button></div></div>
   <div class="row"><span>Фон-заливка по краям</span><div class="seg" id="s-amb"><button data-v="0">Выкл</button><button data-v="1">Вкл</button></div></div>
   <div class="row"><span>Экранные кнопки</span><div class="seg" id="s-pad"><button data-v="0">Скрыть</button><button data-v="1">Показать</button></div></div>
   <div class="row"><span>Вибрация</span><div class="seg" id="s-vib"><button data-v="0">Выкл</button><button data-v="1">Вкл</button></div></div>
   <div class="row"><span>Чувствительность свайпа</span><input type="range" id="r-step" min="6" max="30" step="1"></div>
-  <small>Один палец: тап — OK (нижние углы — левая/правая софт-клавиша), перетаскивание — стрелки (курсор/прокрутка карты, меню).
-  Два пальца: щипок — зум, перетаскивание — сдвиг. «Растянуть» (0–100%) растягивает картинку и интерфейс на весь экран (100% — без полос, но с искажением пропорций). «Больше карты» показывает поля за краями обычного окна игры.</small>
+  <small>Один палец: тап по карте — курсор в эту клетку и OK (нижние углы — левая/правая софт-клавиша), перетаскивание — стрелки (курсор/прокрутка, меню). Два пальца: щипок — лупа, перетаскивание — сдвиг лупы. «Масштаб игры» меняет, сколько карты помещается на экране (после перезапуска): меньше — больше карты и мельче интерфейс.</small>
   <button class="close" id="b-close">Готово</button>
 </div></div>
 <script src="runtime.js"></script>
@@ -91,13 +89,22 @@
   const screen=$('screen'),view=$('view'),bgc=$('bgc'),bgx=bgc.getContext('2d');
   const touch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window||navigator.maxTouchPoints>0;
   // ---- settings ----
-  const DEF={mode:'fit',smooth:1,ext:0,amb:1,pad:touch?1:0,vib:1,step:12,stretch:100,uz:1,px:0,py:0};
+  const DEF={zoom:0,smooth:0,amb:1,pad:touch?1:0,vib:1,step:12,uz:1,px:0,py:0};
   let store=null;try{localStorage.setItem('aow2.t','1');localStorage.removeItem('aow2.t');store=localStorage}catch(e){}
   let cfg=Object.assign({},DEF);
   try{Object.assign(cfg,JSON.parse(store.getItem('aow2.cfg')||'{}'))}catch(e){}
-  cfg.uz=1;cfg.px=0;cfg.py=0; // зум не переживает перезагрузку
+  cfg.uz=1;cfg.px=0;cfg.py=0;
   const save=()=>{try{store.setItem('aow2.cfg',JSON.stringify(cfg))}catch(e){}};
-  RT.env={screen,storage:store,ext:!!cfg.ext,
+  // ---- размер игрового вида: окно / масштаб, кратно тайлу 30x20 (минимум оригинальные 8x16 тайлов) ----
+  const W0=innerWidth,H0=innerHeight,portrait0=H0>W0*1.02;
+  const ctrlH0=(cfg.pad&&portrait0)?Math.round(Math.max(170,Math.min(300,H0*0.28))):0;
+  const AW=W0,AH=H0-ctrlH0;
+  const psMax=Math.max(1,Math.min(AW/240,AH/320));
+  const psAuto=Math.min(psMax,2);
+  const ps=cfg.zoom?Math.max(1,Math.min(psMax,cfg.zoom)):psAuto;
+  const cols=Math.max(8,Math.min(48,Math.round(AW/ps/30))),rows=Math.max(16,Math.min(40,Math.round(AH/ps/20)));
+  RT.V={cols:cols,rows:rows,w:cols*30,h:rows*20};
+  RT.env={screen,storage:store,
     makeCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c},
     onExit:()=>{document.title='Игра завершена — обнови страницу'},
     onFrame:()=>{if(cfg.amb)bgx.drawImage(screen,0,0,48,64)}};
@@ -111,20 +118,18 @@
     const portrait=H>W*1.02;
     ctrlH=0;
     if(cfg.pad){
-      if(portrait){ctrlH=Math.max(170,Math.min(300,H-W*ch/cw));ctrlH=Math.min(ctrlH,H*0.45)}
+      if(portrait)ctrlH=Math.round(Math.max(170,Math.min(300,H*0.28)));
       document.documentElement.style.setProperty('--u',Math.round(Math.max(42,Math.min(64,portrait?ctrlH/3.6:Math.min(H/6,58))))+'px');
     }
     const pb=$('padbg');pb.style.display=cfg.pad&&portrait?'block':'none';pb.style.height=ctrlH+'px';
     const aw=W,ah=H-ctrlH;
-    let s=Math.min(aw/cw,ah/ch);
-    if(cfg.mode==='int'&&s>=1)s=Math.floor(s);
-    else if(cfg.mode==='fill')s=aw/cw;
-    let dw=cw*s,dh=ch*s;
-    const f=cfg.stretch/100;dw+=Math.max(0,aw-dw)*f;dh+=Math.max(0,ah-dh)*f; // растяжение на весь экран
+    const s=Math.min(aw/cw,ah/ch);let dw=cw*s,dh=ch*s;
+    const mism=Math.abs((aw/ah)/(cw/ch)-1);
+    if(mism<0.07){dw=aw;dh=ah}               // почти те же пропорции — заполняем экран целиком
+    $('refit').hidden=mism<0.14;               // сильно другие пропорции (поворот экрана) — предложить перезапуск
     screen.style.width=dw+'px';screen.style.height=dh+'px';
     view.style.width=dw+'px';view.style.height=dh+'px';
     view.style.left=(aw-dw)/2+'px';view.style.top=Math.max(0,(ah-dh)/2)+'px';
-    // зум/сдвиг
     const mx=Math.max(0,dw*cfg.uz-aw)/2+dw*.15*(cfg.uz>1?1:0),my=Math.max(0,dh*cfg.uz-ah)/2+dh*.15*(cfg.uz>1?1:0);
     cfg.px=Math.max(-mx,Math.min(mx,cfg.px));cfg.py=Math.max(-my,Math.min(my,cfg.py));
     view.style.transform=`translate(${cfg.px}px,${cfg.py}px) scale(${cfg.uz})`;
@@ -132,14 +137,16 @@
     const kb=$('keys');kb.style.bottom=(ctrlH?ctrlH+8:'calc(var(--sab) + 140px)')+(ctrlH?'px':'');
   }
   addEventListener('resize',layout);addEventListener('orientationchange',()=>setTimeout(layout,200));
-  // ---- zoom api for gestures ----
+  $('refit').onclick=()=>location.reload();
+  // ---- лупа (щипок/колесо): увеличивает уже отрисованную картинку ----
   const zoom={get:()=>({uz:cfg.uz,px:cfg.px,py:cfg.py}),
     set:(uz,px,py)=>{cfg.uz=Math.max(1,Math.min(5,uz));cfg.px=cfg.uz<=1.01?0:px;cfg.py=cfg.uz<=1.01?0:py;layout()}};
   $('bz').onclick=()=>zoom.set(1,0,0);
   // ---- keys ----
   const vib=()=>{if(cfg.vib&&navigator.vibrate)try{navigator.vibrate(8)}catch(e){}};
   const key=(d,k)=>{RT.midi.unlock();RT.key(d,k)};
-  const G=createGestures({cw:()=>screen.width,ch:()=>screen.height,rect:()=>view.getBoundingClientRect(),cfg:()=>({step:cfg.step,tapSlop:8}),vib,key,zoom,now:()=>performance.now()});
+  const G=createGestures({cw:()=>screen.width,ch:()=>screen.height,rect:()=>view.getBoundingClientRect(),cfg:()=>({step:cfg.step,tapSlop:8}),vib,key,zoom,
+    tapMap:(x,y)=>RT.tapMap&&RT.tapMap(x,y),now:()=>performance.now()});
   const wire=el=>{
     el.addEventListener('pointerdown',e=>{e.preventDefault();try{el.setPointerCapture(e.pointerId)}catch(_){}G.down(e)});
     el.addEventListener('pointermove',e=>{e.preventDefault();G.move(e)});
@@ -178,26 +185,27 @@
     const el=$(id);const upd=()=>el.querySelectorAll('button').forEach(b=>b.classList.toggle('sel',String(get())===b.dataset.v));
     el.querySelectorAll('button').forEach(b=>b.onclick=()=>{set(b.dataset.v);save();upd();layout()});upd();return upd;
   }
-  const ups=[
-    seg('s-mode',()=>cfg.mode,v=>cfg.mode=v),
-    seg('s-smooth',()=>cfg.smooth,v=>cfg.smooth=+v),
-    seg('s-ext',()=>cfg.ext,v=>{cfg.ext=+v;RT.setView(!!cfg.ext)}),
-    seg('s-amb',()=>cfg.amb,v=>cfg.amb=+v),
-    seg('s-pad',()=>cfg.pad,v=>cfg.pad=+v),
-    seg('s-vib',()=>cfg.vib,v=>cfg.vib=+v)];
+  seg('s-smooth',()=>cfg.smooth,v=>cfg.smooth=+v);
+  seg('s-amb',()=>cfg.amb,v=>cfg.amb=+v);
+  seg('s-pad',()=>cfg.pad,v=>cfg.pad=+v);
+  seg('s-vib',()=>cfg.vib,v=>cfg.vib=+v);
   const rs=$('r-step');rs.value=cfg.step;rs.oninput=()=>{cfg.step=+rs.value;save()};
-  const rt=$('r-str');rt.value=cfg.stretch;rt.oninput=()=>{cfg.stretch=+rt.value;save();layout()};
+  const rz=$('r-zoom');rz.min=1;rz.max=Math.max(1.25,Math.floor(psMax*4)/4,ps);rz.value=ps;$('zv').textContent=ps.toFixed(2)+'×';
+  let zoomChanged=false;
+  rz.oninput=()=>{cfg.zoom=+rz.value;zoomChanged=Math.abs(cfg.zoom-ps)>0.01;$('zv').textContent=(+rz.value).toFixed(2)+'×'+(zoomChanged?' (перезапуск)':'');save()};
   $('z-').onclick=()=>zoom.set(cfg.uz/1.25,cfg.px,cfg.py);$('z+').onclick=()=>zoom.set(cfg.uz*1.25,cfg.px,cfg.py);$('z0').onclick=()=>zoom.set(1,0,0);
-  function openSet(){$('set').classList.add('show')}function closeSet(){$('set').classList.remove('show');save()}
+  function openSet(){$('set').classList.add('show')}
+  function closeSet(){$('set').classList.remove('show');save();
+    if(zoomChanged&&confirm('Перезапустить игру с новым масштабом? Несохранённый прогресс миссии будет потерян.'))location.reload()}
   $('bset').onclick=openSet;$('b-close').onclick=closeSet;
   $('set').addEventListener('pointerdown',e=>{if(e.target===$('set'))closeSet()});
   $('bfs').onclick=()=>{const d=document,r=d.documentElement;
     if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d)}
     else{const f=r.requestFullscreen||r.webkitRequestFullscreen;if(f)f.call(r);else alert('Полный экран не поддерживается этим браузером. На iPhone: «Поделиться» → «На экран Домой».')}};
-  document.addEventListener('fullscreenchange',()=>setTimeout(layout,100));
+  document.addEventListener('fullscreenchange',()=>setTimeout(layout,150));
   // ---- run ----
   document.addEventListener('visibilitychange',()=>{RT.dirty=true});
-  layout();
+  RT.setView();layout();
   (function loop(){RT.frame();requestAnimationFrame(loop)})();
   RT.boot().then(layout).catch(e=>console.error('boot failed',e));
 })();

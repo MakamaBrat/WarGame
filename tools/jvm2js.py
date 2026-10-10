@@ -43,6 +43,53 @@ def decode(code):
             base,k=n.rsplit('_',1);n=base;i.arg=int(k)
         i.name=n;i.next=p;out.append(i)
     return out
+
+PATCH=True
+def _fld(c,i):
+    o,n,d=ref(c,i);return f'{o}.{n}:{d}'
+def mk_rtc(i,expr):
+    r=I();r.pc=i.pc;r.name='rtc';r.arg=expr;r.next=i.next;return r
+
+OVERLAY_PRE={0:'RT.M=0;',201:'RT.M=1;',212:'RT.M=2;',229:'RT.M=6;',233:'',238:'RT.M=5;',251:'RT.M=3;',
+  281:'RT.M=(l0["ai:S"]===145?0:3);',280:'RT.M=0;',341:'RT.M=0;'}
+F_PRE={0:'RT.M=0;',75:'RT.M=4;',84:'RT.M=0;RT.edgeFill(l0["a:La;"]["t:[Ljavax/microedition/lcdui/Image;"][0]);',123:'RT.M=3;',422:'RT.M=5;',435:'RT.M=0;'}
+def patch(c,m,ins):
+    if not PATCH:return ins
+    out=list(ins)
+    if c.name=='e' and m.name+m.desc=='a(Z)V':
+        for i in out:
+            if i.pc in OVERLAY_PRE:i.pre=[OVERLAY_PRE[i.pc]]
+    if c.name=='e' and m.name+m.desc=='f()V':
+        for i in out:
+            if i.pc in F_PRE:i.pre=[F_PRE[i.pc]]
+    for k,i in enumerate(out):
+        prev=out[k-1] if k else None;nxt=out[k+1] if k+1<len(out) else None
+        pf=_fld(c,prev.arg) if prev is not None and prev.name in('getfield','getstatic') else ''
+        nf=_fld(c,nxt.arg) if nxt is not None and nxt.name in('putfield','getfield') else ''
+        val=i.arg if i.name in('bipush','sipush','iconst') else None
+        if val is None:continue
+        # viewport columns
+        if val==8 and pf in('g.e:B','g.c:B') and c.name in('e','g'):out[k]=mk_rtc(i,'RT.V.cols')
+        elif val==4 and pf=='e.P:B' and c.name=='e':out[k]=mk_rtc(i,'(RT.V.cols>>1)')
+        # viewport rows (g.g byte)
+        elif val in(15,16) and nf=='g.g:B':out[k]=mk_rtc(i,'RT.V.rows' if val==16 else '(RT.V.rows-1)')
+        # sprite-order grid bm[rows+2][cols+3] and its shifting (scroll) code
+        elif c.name=='e' and (m.name+m.desc) in('u()V','v()V','w()V','x()V','c(II)V') and val in(10,11,17,18) and not (nxt is not None and nxt.name=='putfield' and ref(c,nxt.arg)[1] in('r','s','Y','Z')):
+            out[k]=mk_rtc(i,{10:'(RT.V.cols+2)',11:'(RT.V.cols+3)',17:'(RT.V.rows+1)',18:'(RT.V.rows+2)'}[val])
+        elif c.name=='a' and m.name=='<init>' and val==18 and nxt is not None and nxt.name in('bipush','sipush') and nxt.arg==11 and k+2<len(out) and out[k+2].name=='multianewarray':
+            out[k]=mk_rtc(i,'(RT.V.rows+2)');out[k+1]=mk_rtc(nxt,'(RT.V.cols+3)')
+        elif c.name=='g' and m.name=='<init>' and val==18 and nxt is not None and nxt.name in('bipush','sipush') and nxt.arg==10 and k+2<len(out) and out[k+2].name=='multianewarray':
+            out[k]=mk_rtc(i,'(RT.V.rows+2)');out[k+1]=mk_rtc(nxt,'(RT.V.cols+2)')
+        elif c.name=='g' and (m.name+m.desc,i.pc) in(('a()V',306),('a()V',320),('c()V',9),('c()V',23)):
+            out[k]=mk_rtc(i,'(RT.V.cols+2)' if val==10 else '(RT.V.rows+2)')
+        elif c.name=='e' and m.name+m.desc=='a(Z)V' and (i.pc,val) in((65,320),(71,290)):
+            out[k]=mk_rtc(i,'RT.V.h' if val==320 else '(RT.V.h-30)')
+        elif c.name=='e' and m.name+m.desc=='M()V' and i.pc==252 and val==240:
+            out[k]=mk_rtc(i,'RT.V.w')
+        # back buffer size
+        elif c.name=='a' and val==270:out[k]=mk_rtc(i,'(RT.V.w+30)')
+        elif c.name=='a' and val==340:out[k]=mk_rtc(i,'(RT.V.h+20)')
+    return out
 BIN={'iadd':'({a}+{b})|0','isub':'({a}-{b})|0','imul':'Math.imul({a},{b})','iand':'{a}&{b}','ior':'{a}|{b}','ixor':'{a}^{b}','ishl':'{a}<<{b}','ishr':'{a}>>{b}','iushr':'({a}>>>{b})|0','idiv':'$idiv({a},{b})','irem':'$irem({a},{b})'}
 LBIN={'ladd':'$l({a}+{b})','lsub':'$l({a}-{b})','lmul':'$l({a}*{b})','ldiv':'$ldiv({a},{b})','lrem':'$lrem({a},{b})','land':'{a}&{b}','lor':'{a}|{b}','lxor':'{a}^{b}','lshl':'$l({a}<<BigInt({b}&63))','lshr':'{a}>>BigInt({b}&63)','lushr':'$l(BigInt.asUintN(64,{a})>>BigInt({b}&63))'}
 CMP={'eq':'===','ne':'!==','lt':'<','ge':'>=','gt':'>','le':'<='}
@@ -79,6 +126,7 @@ def step(X,c,i,st):
     n=i.name;d=len(st);v=lambda k:'s%d'%k;a=i.arg
     def ret(code,nst,succ=(),fall=True):return code,nst,list(succ),fall
     def jmp(t):return '{pc=%d;continue L;}'%t
+    if n=='rtc':return ret(f'{v(d)}={a};',st+['1'])
     if n=='nop':return ret('',st)
     if n=='aconst_null':return ret(f'{v(d)}=null;',st+['1'])
     if n=='iconst_m1':return ret(f'{v(d)}=-1;',st+['1'])
@@ -182,7 +230,7 @@ def step(X,c,i,st):
         cn=c.cp[c.cp[a[0]][1]][1];k=a[1];return ret(f'{v(d-k)}=$mna({J(cn)},[{",".join(v(d-k+j) for j in range(k))}]);',st[:-k]+['1'])
     raise Exception('op '+n)
 def emit_method(X,c,m):
-    ins=decode(m.code);bypc={i.pc:i for i in ins}
+    ins=patch(c,m,decode(m.code));bypc={i.pc:i for i in ins}
     state={0:[]};work=[0];leaders={0}
     for (s,e,h,t) in m.exc:state[h]=['1'];work.append(h);leaders.add(h)
     while work:
@@ -217,6 +265,7 @@ def emit_method(X,c,m):
     for i in ins:
         if i.pc not in state:continue
         code,_,_,_=step(X,c,i,state[i.pc])
+        code=''.join(getattr(i,'pre',()))+code
         if not simple and i.pc in leaders:out.append(f'case {i.pc}:'+('bpc=%d;'%i.pc if m.exc else ''))
         out.append(code)
     if simple:body+=out
@@ -229,7 +278,8 @@ def emit_method(X,c,m):
                 cond=f'bpc>={s}&&bpc<{e}'+(f'&&$io(e,{J(tn)})' if tn else '')
                 hs.append(f'if({cond}){{s0=e;pc={h};continue L;}}')
             inner=f'try{{{inner}}}catch(e){{e=$wex(e);'+''.join(hs)+'throw e;}'
-        body.append('L:for(;;){'+inner+'}')
+        dbg=('let _n=0;' if os.environ.get('AOW_LOOPDBG') else '');chk=("if(++_n>3000000)throw new Error('LOOP in %s.%s%s');"%(c.name,m.name,m.desc) if os.environ.get('AOW_LOOPDBG') else '')
+        body.append(dbg+'L:for(;;){'+chk+inner+'}')
     pre=('static ' if static else '')+('async ' if isasync else '')
     return f'{pre}{J(m.name+m.desc)}({",".join(params)}){{\n'+'\n'.join(body)+'\n}'
 def default(desc):return '0n' if desc=='J' else 'null' if desc[0] in 'L[' else '0'
